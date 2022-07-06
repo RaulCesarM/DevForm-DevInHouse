@@ -1,9 +1,15 @@
 using MySql.Data.MySqlClient;
+using DevForm.Persistence;
+using DevForm.Models;
+
+
 namespace DevForm {
     public partial class FormularioInscricao : Form {
        int id;
        string ConnectionString ="datasource =localhost; username = root;password=Jaraguadosul1234@;database=devinhouse";
-        MySqlConnection ConexaoBanco = new MySqlConnection("datasource =localhost; username = root;password=Jaraguadosul1234@;database=devinhouse");
+       MySqlConnection ConexaoBanco = new MySqlConnection("datasource =localhost; username = root;password=Jaraguadosul1234@;database=devinhouse");
+       
+
 
         public FormularioInscricao() {
             InitializeComponent();
@@ -17,48 +23,40 @@ namespace DevForm {
             VIEW.Columns.Add("CURSO", 120, HorizontalAlignment.Left);
             VIEW.Columns.Add("IDADE", 80, HorizontalAlignment.Left);
             VIEW.Columns.Add("DATA DE NASCIMENTO", 240, HorizontalAlignment.Left);
+           
+
         }
-        private void BtnSalvar_Click(object sender, EventArgs e) { 
-            if(comboBox1.Text == "SELECIONE O CURSO") {
-                MessageBox.Show("Selecione um curso");
-            } else {
-                try {
-                    ConexaoBanco = new MySqlConnection(ConnectionString);
-                    string sql = "INSERT INTO Aluno (Nome, Sobrenome, Idade, CursosInscrito, Nascimento )" +
-                                            " VALUES ('" + Nome.Text +
-                                                   "','" + Sobrenome.Text +
-                                                   "','" + Idadetxt.Text +
-                                                   "','" + comboBox1.Text +
-                                                   "','" + dateTimePicker1.Text + "')";
-                    MySqlCommand MyComand = new MySqlCommand(sql, ConexaoBanco);
-                    ConexaoBanco.Open();
-                    MyComand.ExecuteReader();
-                } catch (Exception ex) {
-                    MessageBox.Show(ex.Message);
-                } finally {
-                    ConexaoBanco.Close();
+        private void BtnSalvar_Click(object sender, EventArgs e) {
+
+            ConexaoForm1 conec = new ConexaoForm1();
+            Aluno aluno = new Aluno();
+            aluno.Nome = Nome.Text;
+            aluno.SobreNome = Sobrenome.Text;
+            aluno.CursoInscrito = comboBox1.Text;
+            aluno.Idade = Convert.ToUInt16(Idadetxt.Text);
+            aluno.Nascimento = dateTimePicker1.Text;
+            conec.SalvarNoBanco(aluno);                    
                     Nome.Text = "";
                     Sobrenome.Text = "";
                     Idadetxt.Text = "";
                     textBox1.Text = "";
                     textBox2.Text ="";
-                    textBox3.Text = "";
-                }
-
-            }
+                    textBox3.Text = "";    
              
         }
 
-        private void BtnBuscar_Click(object sender, EventArgs e) {
+      
+
+        public void BtnBuscar_Click(object sender, EventArgs e) {
             VIEW.Items.Clear();
-            try { 
+            try {
                 ConexaoBanco = new MySqlConnection(ConnectionString);
                 string sql = "SELECT * FROM Aluno";
                 ConexaoBanco.Open();
-                MySqlCommand MyComand = new MySqlCommand(sql,ConexaoBanco);               
-                MySqlDataReader dataread = MyComand.ExecuteReader(); 
+                MySqlCommand MyComand = new MySqlCommand(sql, ConexaoBanco);
+                MySqlDataReader dataread = MyComand.ExecuteReader();
                 while (dataread.Read()) {
-                    string[] linha = {                        
+                    string[] linha = {
                         dataread.GetString(0),
                         dataread.GetString(1),
                         dataread.GetString(2),
@@ -68,8 +66,8 @@ namespace DevForm {
                 };
                     var listaview = new ListViewItem(linha);
                     VIEW.Items.Add(listaview);
-                   
-                   
+
+
                 }
             } catch (Exception ex) {
                 MessageBox.Show(ex.Message);
@@ -77,6 +75,8 @@ namespace DevForm {
                 ConexaoBanco.Close();
             }
         }
+
+
         private void CarregaCombo() {
             
             try {
